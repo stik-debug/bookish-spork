@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row align-items-center py-4">
+<div class="col-lg-6">
+<h1 class="fw-bold text-primary">Run your Chama the modern way</h1>
+<p class="lead text-muted">Contributions, loans, members & reports — built for Kenyan savings groups.</p>
+<p><strong>{{ trial }} days free trial</strong> on every plan. After that, pay monthly or the Chama locks automatically.</p>
+<a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">Start free trial</a>
+<a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+</div>
+<div class="col-lg-6 mt-4">
+<div class="row g-2">
+{% for key, p in plans.items() %}
+<div class="col-12">
+<div class="card p-3 {% if key == 'standard' %}border border-primary{% endif %}">
+<div class="d-flex justify-content-between align-items-center">
+<div>
+<strong>{{ p.name }}</strong>
+<span class="text-muted small">· up to {{ p.max_members }} members</span>
+</div>
+<div class="fw-bold text-primary">KES {{ "{:,.0f}".format(p.price) }}/mo</div>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+</div>
+{% endblock %}

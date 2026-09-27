@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Merry Go Round - {{ chama.name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="{{ url_for('chama_home', chama_id=chama.id) }}">{{ chama.name }}</a></li>
+<li class="breadcrumb-item active">Merry Go Round</li>
+</ol></nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h4><i class="bi bi-arrow-repeat"></i> Merry Go Round</h4>
+{% if is_admin and not locked and not mgr %}
+<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createMgr">Create</button>
+{% endif %}
+</div>
+
+{% if locked %}
+<div class="alert alert-warning">Chama locked — renew to manage Merry Go Round.</div>
+{% endif %}
+
+{% if mgr %}
+<div class="card p-3 mb-3">
+<strong>{{ mgr.name }}</strong>
+<span class="text-muted small">· KES {{ "{:,.0f}".format(mgr.amount_per_member) }} per member · {{ mgr.frequency }}</span>
+</div>
+<div class="card">
+<div class="table-responsive">
+<table class="table mb-0">
+<thead><tr><th>#</th><th>Recipient</th><th>Date</th><th>Pot</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for r in mgr.rounds %}
+<tr>
+<td>{{ r.round_number }}</td>
+<td>{{ r.recipient.name if r.recipient else '—' }}</td>
+<td>{{ r.scheduled_date.strftime('%d %b %Y') if r.scheduled_date else '—' }}</td>
+<td>KES {{ "{:,.0f}".format(r.pot_amount or 0) }}</td>
+<td>
+{% if r.status == 'paid' %}<span class="badge bg-success">Paid</span>
+{% elif r.status == 'upcoming' %}<span class="badge bg-secondary">Upcoming</span>
+{% else %}<span class="badge bg-light text-dark">{{ r.status }}</span>{% endif %}
+</td>
+<td>
+{% if is_admin and r.status == 'upcoming' and not locked %}
+<form method="POST" action="{{ url_for('mark_mgr_paid', round_id=r.id) }}" class="d-inline">
+<button class="btn btn-success btn-sm">Mark paid</button>
+</form>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+<p>No active Merry Go Round.</p>
+{% if is_admin and not locked %}
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createMgr">Create one</button>
+{% endif %}
+</div>
+{% endif %}
+
+{% if is_admin and not locked %}
+<div class="modal fade" id="createMgr" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<form method="POST" action="{{ url_for('create_mgr', chama_id=chama.id) }}">
+<div class="modal-header"><h5 class="modal-title">Create Merry Go Round</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="mb-3"><label class="form-label">Name</label>
+<input name="name" class="form-control" value="Merry Go Round 2026"></div>
+<div class="mb-3"><label class="form-label">Amount per member (KES)</label>
+<input type="number" name="amount_per_member" class="form-control" value="1000" min="100" required></div>
+<div class="mb-3"><label class="form-label">Frequency</label>
+<select name="frequency" class="form-select">
+<option value="monthly">Monthly</option>
+<option value="weekly">Weekly</option>
+</select></div>
+<p class="small text-muted">One round is created per active member, in order.</p>
+</div>
+<div class="modal-footer"><button class="btn btn-primary">Create</button></div>
+</form>
+</div></div></div>
+{% endif %}
+{% endblock %}

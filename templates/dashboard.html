@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - ChamaPay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+<div><h4 class="mb-0">Habari, {{ current_user.name.split()[0] }}</h4>
+<small class="text-muted">{{ current_user.phone }}</small></div>
+<a href="{{ url_for('create_chama') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> New Chama</a>
+</div>
+{% if chamas %}
+<div class="row g-3">
+{% for c in chamas %}
+<div class="col-md-6">
+<div class="card p-3 h-100">
+<div class="d-flex justify-content-between">
+<h5 class="mb-1">{{ c.name }}</h5>
+{% if c.subscription_status == 'locked' %}
+<span class="badge bg-danger">Locked</span>
+{% elif c.subscription_status == 'trial' %}
+<span class="badge bg-info text-dark">Trial</span>
+{% else %}
+<span class="badge bg-success">Active</span>
+{% endif %}
+</div>
+<p class="small text-muted mb-1">{{ c.plan_name() }} · KES {{ "{:,.0f}".format(c.monthly_price()) }}/mo</p>
+<p class="small text-muted mb-2">{{ c.description[:80] if c.description else 'No description' }}</p>
+<a href="{{ url_for('chama_home', chama_id=c.id) }}" class="btn btn-outline-primary btn-sm w-100">Open</a>
+</div></div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+<p class="text-muted">You have no Chamas yet.</p>
+<a href="{{ url_for('create_chama') }}" class="btn btn-primary">Create your first Chama</a>
+</div>
+{% endif %}
+{% endblock %}
