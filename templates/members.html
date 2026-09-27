@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Members - {{ chama.name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="{{ url_for('chama_home', chama_id=chama.id) }}">{{ chama.name }}</a></li>
+<li class="breadcrumb-item active">Members</li>
+</ol></nav>
+<div class="d-flex justify-content-between mb-3">
+<h4>Members</h4>
+{% if is_admin and not locked %}
+<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">Add member</button>
+{% endif %}
+</div>
+<div class="card"><div class="table-responsive">
+<table class="table mb-0">
+<thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Savings</th></tr></thead>
+<tbody>
+{% for m in members %}
+<tr>
+<td>{{ m.user.name }}</td>
+<td>{{ m.user.phone }}</td>
+<td><span class="badge bg-secondary">{{ m.role }}</span></td>
+<td>KES {{ "{:,.0f}".format(m.total_savings) }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div></div>
+{% if is_admin and not locked %}
+<div class="modal fade" id="addModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<form method="POST" action="{{ url_for('add_member', chama_id=chama.id) }}">
+<div class="modal-header"><h5 class="modal-title">Add member</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="mb-3"><label class="form-label">Phone (must be registered)</label>
+<input type="tel" name="phone" class="form-control" required></div>
+<div class="mb-3"><label class="form-label">Role</label>
+<select name="role" class="form-select">
+<option value="member">Member</option>
+<option value="treasurer">Treasurer</option>
+<option value="secretary">Secretary</option>
+<option value="chairperson">Chairperson</option>
+</select></div>
+</div>
+<div class="modal-footer"><button class="btn btn-primary">Add</button></div>
+</form>
+</div></div></div>
+{% endif %}
+{% endblock %}
