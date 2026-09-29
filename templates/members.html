@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Members - {{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Members</h2><p>{{ chama.name }} · {{ members|length }} of {{ limit }} on the {{ chama.plan_name() }} plan</p></div>
+{% if is_admin and not locked %}<button class="btn pri" data-open="add">Add member</button>{% endif %}</div>
+<div class="card tight"><ul class="list">
+{% for m in members %}<li><span class="av">{{ m.user.name[:1] }}</span><span class="grow">{{ m.user.name }}<br><small>{{ m.user.phone }}</small></span>
+<span style="text-align:right"><span class="pill">{{ m.role|capitalize }}</span><br><small>KES {{ "{:,.0f}".format(m.total_savings) }} saved</small></span></li>{% endfor %}
+</ul></div>
+{% if is_admin and not locked %}
+<dialog id="add"><form method="POST" action="{{ url_for('add_member', chama_id=chama.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><h3>Add a member</h3>
+<div class="field"><label for="ph">Their phone number</label><input id="ph" type="tel" name="phone" required><small>They must have created a ChamaPay account with this number first.</small></div>
+<div class="field"><label for="ro">Role</label><select id="ro" name="role"><option value="member">Member</option><option value="treasurer">Treasurer</option><option value="secretary">Secretary</option><option value="chairperson">Chairperson</option></select></div>
+<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">Add member</button></div></form></dialog>
+{% endif %}
+{% endblock %}
+{% block tabs %}{% include '_tabs.html' %}{% endblock %}

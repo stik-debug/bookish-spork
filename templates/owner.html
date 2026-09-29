@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Owner - ChamaPay{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Platform owner</h2><p>All chamas and subscription payments</p></div></div>
+<div class="stats"><div class="stat"><b>KES {{ "{:,.0f}".format(revenue) }}</b><small>Confirmed revenue</small></div><div class="stat"><b>{{ active_count }}</b><small>Active or on trial</small></div><div class="stat"><b>{{ locked_count }}</b><small>Locked</small></div></div>
+{% if pending %}
+<div class="card tight"><h3 style="padding:16px 18px 4px">Payments to check ({{ pending|length }})</h3><ul class="list">
+{% for p in pending %}<li style="flex-wrap:wrap"><span class="grow">{{ p.chama.name }}<br><small>KES {{ "{:,.0f}".format(p.amount) }} · {{ p.months }} mo · code {{ p.mpesa_receipt or '-' }} · {{ p.phone }}</small></span>
+<form method="POST" action="{{ url_for('owner_payment', payment_id=p.id, action='confirm') }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm pri">Confirm and unlock</button></form>
+<form method="POST" action="{{ url_for('owner_payment', payment_id=p.id, action='reject') }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm bad">Reject</button></form></li>{% endfor %}
+</ul></div>
+{% endif %}
+<div class="card tight"><h3 style="padding:16px 18px 4px">All chamas</h3><ul class="list">
+{% for c in chamas %}<li><span class="grow">{{ c.name }}<br><small>{{ c.plan_name() }} · ends {{ (c.trial_ends_at if c.subscription_status=='trial' else c.subscription_ends_at).strftime('%d %b %Y') if (c.trial_ends_at if c.subscription_status=='trial' else c.subscription_ends_at) else '-' }}</small></span>
+{% if c.subscription_status=='locked' %}<span class="pill bad">Locked</span><form method="POST" action="{{ url_for('owner_unlock', chama_id=c.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="months" value="1"><button class="btn sm pri">Unlock 1 month</button></form>
+{% else %}<span class="pill {{ 'info' if c.subscription_status=='trial' else 'ok' }}">{{ 'Trial' if c.subscription_status=='trial' else 'Active' }}</span><form method="POST" action="{{ url_for('owner_lock', chama_id=c.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm bad">Lock</button></form>{% endif %}</li>
+{% else %}<li class="empty grow">No chamas yet.</li>{% endfor %}
+</ul></div>
+<div class="card tight"><h3 style="padding:16px 18px 4px">Recent confirmed payments</h3><ul class="list">
+{% for p in payments %}<li><span class="grow">{{ p.chama.name }}<br><small>{{ (p.completed_at or p.created_at).strftime('%d %b %Y') }} · {{ p.mpesa_receipt or '-' }}</small></span><span class="amt">KES {{ "{:,.0f}".format(p.amount) }}</span></li>
+{% else %}<li class="empty grow">No payments yet.</li>{% endfor %}
+</ul></div>
+{% endblock %}

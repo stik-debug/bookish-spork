@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Your chamas - ChamaPay{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Habari, {{ current_user.name.split()[0] }}</h2><p>{{ current_user.phone }}</p></div>
+<a class="btn pri" href="{{ url_for('create_chama') }}">New chama</a></div>
+{% if chamas %}
+<div class="grid">
+{% for c in chamas %}
+<a class="card" href="{{ url_for('chama_home', chama_id=c.id) }}" style="text-decoration:none;color:inherit;display:block">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>{{ c.name }}</h3>
+{% if c.subscription_status=='locked' %}<span class="pill bad">Locked</span>{% elif c.subscription_status=='trial' %}<span class="pill info">Trial</span>{% else %}<span class="pill ok">Active</span>{% endif %}</div>
+<p class="mute" style="margin:6px 0 0">{{ c.plan_name() }} plan{% if c.description %} · {{ c.description[:60] }}{% endif %}</p>
+</a>
+{% endfor %}
+</div>
+{% else %}
+<div class="card empty"><h3>You are not in a chama yet</h3><p>Create one for your group, or ask your chairperson to add your phone number.</p>
+<a class="btn pri" href="{{ url_for('create_chama') }}">Create your first chama</a></div>
+{% endif %}
+{% endblock %}

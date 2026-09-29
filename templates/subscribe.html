@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Subscription - {{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Subscription</h2><p>{{ chama.name }}</p></div><a class="btn" href="{{ url_for('chama_home', chama_id=chama.id) }}">Back</a></div>
+{% if locked %}<div class="banner"><h3>This chama is locked</h3><p>It unlocks as soon as your payment is confirmed.</p></div>{% endif %}
+{% if pending %}<div class="flash info">We are checking {{ pending }} payment{{ '' if pending==1 else 's' }}. You do not need to pay again.</div>{% endif %}
+<form method="POST" class="card"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label>Plan</label>
+{% for key, p in plans.items() %}
+<label class="radio"><input type="radio" name="plan" value="{{ key }}" {% if key==current_plan %}checked{% endif %}><span><b>{{ p.name }}</b>, KES {{ "{:,.0f}".format(p.price) }} a month<br><span class="mute">Up to {{ p.max_members }} members</span></span></label>
+{% endfor %}</div>
+<div class="field"><label for="mo">How many months?</label><select id="mo" name="months"><option value="1">1 month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
+<div class="field"><label for="ph">Your M-Pesa number</label><input id="ph" type="tel" name="phone" value="{{ current_user.phone }}" required></div>
+{% if live %}
+<button class="btn pri block">Pay with M-Pesa</button>
+<p class="mute">You will get a prompt on your phone. Enter your PIN and the chama unlocks right away.</p>
+{% else %}
+<div class="card" style="background:var(--info-bg)"><b>How to pay</b><p style="margin:6px 0 0">{{ pay_info }}</p></div>
+<div class="field"><label for="mc">M-Pesa confirmation code</label><input id="mc" name="mpesa_code" placeholder="e.g. SJK2L9XYZA" autocapitalize="characters" required><small>You will find it in the M-Pesa message you get after paying.</small></div>
+<button class="btn pri block">I have paid</button>
+{% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}ChamaPay Kenya: run your chama in the open{% endblock %}
+{% block content %}
+<section class="land">
+<h1>Your chama's money, always in the open.</h1>
+<p class="lead">Record contributions, approve loans and see who has paid. Every member can check the books anytime, so no one has to ask the treasurer.</p>
+<a class="btn pri" href="{{ url_for('register') }}">Start {{ trial }}-day free trial</a>
+<a class="btn" href="{{ url_for('login') }}">Log in</a>
+<p class="mute">No card needed. After the trial you pay monthly, or the chama locks until you do.</p>
+</section>
+<div class="plans">
+{% for key, p in plans.items() %}
+<div class="card plan {% if key=='standard' %}best{% endif %}">
+<h3>{{ p.name }}</h3><p class="mute">Up to {{ p.max_members }} members</p>
+<div class="price">KES {{ "{:,.0f}".format(p.price) }}<small class="mute" style="font:500 15px 'DM Sans'"> /month</small></div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

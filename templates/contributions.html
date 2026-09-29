@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Savings - {{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Savings</h2><p>{{ chama.name }}</p></div>
+{% if is_admin and not locked %}<button class="btn pri" data-open="add">Record payment</button>{% endif %}</div>
+{% if locked %}<div class="banner"><h3>Locked</h3><p>Renew the subscription to record new payments.</p><a class="btn sun" href="{{ url_for('subscription_pay', chama_id=chama.id) }}">Renew now</a></div>{% endif %}
+<div class="card tight"><ul class="list">
+{% for c in contribs %}<li><span class="av">{{ c.user.name[:1] }}</span><span class="grow">{{ c.user.name }}<br><small>{{ c.created_at.strftime('%d %b %Y') }} · {{ c.payment_method }}{% if c.mpesa_code %} · {{ c.mpesa_code }}{% endif %}</small></span><span class="amt">KES {{ "{:,.0f}".format(c.amount) }}</span></li>
+{% else %}<li class="empty grow">No payments recorded yet.{% if is_admin %} Tap "Record payment" when a member pays.{% endif %}</li>{% endfor %}
+</ul></div>
+{% if is_admin and not locked %}
+<dialog id="add"><form method="POST" action="{{ url_for('add_contribution', chama_id=chama.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><h3>Record a payment</h3>
+<div class="field"><label for="u">Member</label><select id="u" name="user_id">{% for m in members %}<option value="{{ m.user_id }}">{{ m.user.name }}</option>{% endfor %}</select></div>
+<div class="field"><label for="am">Amount (KES)</label><input id="am" type="number" step="0.01" min="1" name="amount" value="{{ chama.contribution_amount|int }}" required></div>
+<div class="field"><label for="pm">How did they pay?</label><select id="pm" name="payment_method"><option>Cash</option><option>M-Pesa</option><option>Bank</option></select></div>
+<div class="field"><label for="mc">M-Pesa code (optional)</label><input id="mc" name="mpesa_code" autocapitalize="characters"><small>Stops the same payment being recorded twice.</small></div>
+<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">Save payment</button></div></form></dialog>
+{% endif %}
+{% endblock %}
+{% block tabs %}{% include '_tabs.html' %}{% endblock %}

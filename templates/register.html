@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Create account - ChamaPay{% endblock %}
+{% block content %}
+<div class="auth card">
+<h1>Create your account</h1><p class="mute">Use the phone number you use for M-Pesa. Your chama officials will find you by it.</p>
+<form method="POST"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label for="n">Full name</label><input id="n" name="name" autocomplete="name" required></div>
+<div class="field"><label for="p">Phone number</label><input id="p" type="tel" name="phone" placeholder="0712345678" autocomplete="tel" required></div>
+<div class="field"><label for="pw">Password</label><input id="pw" type="password" name="password" minlength="8" autocomplete="new-password" required><small>At least 8 characters.</small></div>
+<div class="field"><label for="pc">Confirm password</label><input id="pc" type="password" name="confirm_password" autocomplete="new-password" required></div>
+<button class="btn pri block">Create account</button>
+</form>
+<p class="mute" style="text-align:center;margin-bottom:0">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</div>
+{% endblock %}

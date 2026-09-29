@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Log in - ChamaPay{% endblock %}
+{% block content %}
+<div class="auth card">
+<h1>Welcome back</h1><p class="mute">Log in with your phone number.</p>
+<form method="POST"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label for="phone">Phone number</label><input id="phone" type="tel" name="phone" placeholder="0712345678" autocomplete="tel" required autofocus></div>
+<div class="field"><label for="pw">Password</label><input id="pw" type="password" name="password" autocomplete="current-password" required></div>
+<button class="btn pri block">Log in</button>
+</form>
+<p class="mute" style="text-align:center;margin-bottom:0">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+</div>
+{% endblock %}

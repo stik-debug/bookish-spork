@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Merry-go-round - {{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Merry-go-round</h2><p>{{ chama.name }}</p></div>
+{% if is_admin and not locked and not mgr %}<button class="btn pri" data-open="new">Start one</button>{% endif %}</div>
+{% if locked %}<div class="banner"><h3>Locked</h3><p>Renew the subscription to manage rounds.</p><a class="btn sun" href="{{ url_for('subscription_pay', chama_id=chama.id) }}">Renew now</a></div>{% endif %}
+{% if mgr %}
+<div class="card"><h3>{{ mgr.name }}</h3><p class="mute" style="margin:0">KES {{ "{:,.0f}".format(mgr.amount_per_member) }} from each member, {{ mgr.frequency }}</p></div>
+<div class="card tight"><ul class="list">
+{% for r in mgr.rounds %}<li><span class="av">{{ r.round_number }}</span><span class="grow">{{ r.recipient.name if r.recipient else '-' }}<br><small>{{ r.scheduled_date.strftime('%d %b %Y') if r.scheduled_date else '' }} · pot KES {{ "{:,.0f}".format(r.pot_amount or 0) }}</small></span>
+{% if r.status=='paid' %}<span class="pill ok">Paid</span>
+{% elif is_admin and not locked %}<form method="POST" action="{{ url_for('mark_mgr_paid', round_id=r.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm">Mark paid</button></form>
+{% else %}<span class="pill">Upcoming</span>{% endif %}</li>{% endfor %}
+</ul></div>
+{% else %}
+<div class="card empty"><h3>No merry-go-round yet</h3><p>Each member takes a turn receiving the pot.</p></div>
+{% endif %}
+{% if is_admin and not locked %}
+<dialog id="new"><form method="POST" action="{{ url_for('create_mgr', chama_id=chama.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><h3>Start a merry-go-round</h3>
+<div class="field"><label>Name</label><input name="name" value="Merry-go-round"></div>
+<div class="field"><label>Amount from each member (KES)</label><input type="number" name="amount_per_member" value="1000" min="1" required></div>
+<div class="field"><label>How often?</label><select name="frequency"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select></div>
+<p class="mute">One round is created for each active member, in the order they joined.</p>
+<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">Start</button></div></form></dialog>
+{% endif %}
+{% endblock %}
+{% block tabs %}{% include '_tabs.html' %}{% endblock %}

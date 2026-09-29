@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}New chama - ChamaPay{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Create your chama</h2><p>{{ trial }} days free on any plan. You can change the plan later.</p></div></div>
+<form method="POST" class="card"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label for="n">Chama name</label><input id="n" name="name" placeholder="Umoja Women Group" required></div>
+<div class="field"><label for="d">What is it for? (optional)</label><textarea id="d" name="description" rows="2"></textarea></div>
+<div class="field"><label>Plan</label>
+{% for key, p in plans.items() %}
+<label class="radio"><input type="radio" name="plan" value="{{ key }}" {% if key=='basic' %}checked{% endif %}><span><b>{{ p.name }}</b>, KES {{ "{:,.0f}".format(p.price) }} a month<br><span class="mute">Up to {{ p.max_members }} members</span></span></label>
+{% endfor %}</div>
+<div class="field"><label for="a">Monthly contribution per member (KES)</label><input id="a" type="number" name="contribution_amount" value="1000" min="1"></div>
+<div class="field"><label for="dy">Contribution due on day of month</label><input id="dy" type="number" name="contribution_day" value="5" min="1" max="28"></div>
+<div class="field"><label for="i">Loan interest (%)</label><input id="i" type="number" name="loan_interest_rate" value="5" step="0.5" min="0" max="50"><small>A member can borrow up to 3 times their savings.</small></div>
+<button class="btn pri block">Create chama and start trial</button>
+</form>
+{% endblock %}

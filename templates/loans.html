@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Loans - {{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>Loans</h2><p>{{ chama.name }} · interest {{ chama.loan_interest_rate|round(1) }}%</p></div>
+{% if not locked and membership %}<button class="btn pri" data-open="apply">Ask for a loan</button>{% endif %}</div>
+{% if locked %}<div class="banner"><h3>Locked</h3><p>Renew the subscription to manage loans.</p><a class="btn sun" href="{{ url_for('subscription_pay', chama_id=chama.id) }}">Renew now</a></div>{% endif %}
+<div class="card tight"><ul class="list">
+{% for l in loans %}
+<li style="flex-wrap:wrap"><span class="av">{{ l.user.name[:1] }}</span>
+<span class="grow">{{ l.user.name }}<br><small>KES {{ "{:,.0f}".format(l.amount) }}{% if l.purpose %} · {{ l.purpose }}{% endif %}{% if l.status=='active' %} · owes KES {{ "{:,.0f}".format(l.total_repayable - l.amount_paid) }}{% endif %}</small></span>
+<span class="pill {% if l.status=='active' %}warn{% elif l.status=='repaid' %}ok{% elif l.status=='pending' %}info{% else %}bad{% endif %}">{{ {'active':'Owing','pending':'Waiting','repaid':'Repaid','rejected':'Declined'}[l.status] }}</span>
+{% if is_admin and l.status=='pending' and not locked %}
+<form method="POST" action="{{ url_for('decide_loan', loan_id=l.id) }}" style="display:flex;gap:6px"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<button class="btn sm pri" name="action" value="approve">Approve</button><button class="btn sm" name="action" value="reject">Decline</button></form>
+{% elif l.status=='active' and not locked %}<button class="btn sm" data-open="repay{{ l.id }}">Repay</button>{% endif %}
+</li>
+{% else %}<li class="empty grow">No loans yet.</li>{% endfor %}
+</ul></div>
+{% for l in loans if l.status=='active' and not locked %}
+<dialog id="repay{{ l.id }}"><form method="POST" action="{{ url_for('repay_loan', loan_id=l.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><h3>Record a repayment</h3>
+<p class="mute">{{ l.user.name }} owes KES {{ "{:,.0f}".format(l.total_repayable - l.amount_paid) }}</p>
+<div class="field"><label>Amount (KES)</label><input type="number" step="0.01" min="1" name="amount" value="{{ (l.total_repayable - l.amount_paid)|round(2) }}" required></div>
+<div class="field"><label>How did they pay?</label><select name="payment_method"><option>Cash</option><option>M-Pesa</option></select></div>
+<div class="field"><label>M-Pesa code (optional)</label><input name="mpesa_code"></div>
+<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">Save</button></div></form></dialog>
+{% endfor %}
+{% if membership and not locked %}
+<dialog id="apply"><form method="POST" action="{{ url_for('apply_loan', chama_id=chama.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><h3>Ask for a loan</h3>
+<p class="mute">You can borrow up to KES {{ "{:,.0f}".format(membership.total_savings * chama.max_loan_multiplier) }} ({{ chama.max_loan_multiplier|int }} times your savings).</p>
+<div class="field"><label for="la">Amount (KES)</label><input id="la" type="number" name="amount" min="100" required></div>
+<div class="field"><label for="lp">What is it for?</label><input id="lp" name="purpose" maxlength="200"></div>
+<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">Send request</button></div></form></dialog>
+{% endif %}
+{% endblock %}
+{% block tabs %}{% include '_tabs.html' %}{% endblock %}

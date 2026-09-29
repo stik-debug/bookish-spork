@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ chama.name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h2>{{ chama.name }}</h2><p>{{ chama.plan_name() }} plan · {{ members|length }} member{{ '' if members|length==1 else 's' }}</p></div></div>
+{% if locked %}
+<div class="banner"><h3>This chama is locked</h3><p>The subscription has ended. Members can still view records. Renew to record new payments, loans and members.</p>
+<a class="btn sun" href="{{ url_for('subscription_pay', chama_id=chama.id) }}">Renew now</a></div>
+{% else %}
+<p class="mute" style="margin-top:0">
+{% if chama.subscription_status=='trial' %}Free trial ends {{ chama.trial_ends_at.strftime('%d %b %Y') if chama.trial_ends_at else '' }}{% else %}Paid until {{ chama.subscription_ends_at.strftime('%d %b %Y') if chama.subscription_ends_at else '' }}{% endif %}
+· <a href="{{ url_for('subscription_pay', chama_id=chama.id) }}">Renew or change plan</a></p>
+{% endif %}
+<div class="card hero-card">
+<small>Total group savings</small><div class="big">KES {{ "{:,.0f}".format(total_savings) }}</div>
+{% set target = chama.contribution_amount * members|length %}
+<small style="margin-top:10px">This month: {{ paid_ids|length }} of {{ members|length }} members have paid</small>
+<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{ members|length }}" aria-valuenow="{{ paid_ids|length }}"><span style="width:{{ (paid_ids|length / members|length * 100) if members else 0 }}%"></span></div>
+</div>
+<div class="stats">
+<div class="stat"><b>KES {{ "{:,.0f}".format(chama.contribution_amount) }}</b><small>Monthly contribution</small></div>
+<div class="stat"><b>{{ loans|length }}</b><small>Open loans</small></div>
+<div class="stat"><b>Day {{ chama.contribution_day }}</b><small>Due each month</small></div>
+</div>
+<div class="card tight"><h3 style="padding:16px 18px 4px">Who has paid this month</h3>
+<ul class="list">
+{% for m in members %}
+<li><span class="av">{{ m.user.name[:1] }}</span><span class="grow">{{ m.user.name }}<br><small>{{ m.role|capitalize }}</small></span>
+{% if m.user_id in paid_ids %}<span class="pill ok">Paid</span>{% else %}<span class="pill warn">Not yet</span>{% endif %}</li>
+{% else %}<li class="empty grow">No members yet.</li>{% endfor %}
+</ul></div>
+<div class="card tight"><h3 style="padding:16px 18px 4px">Recent contributions</h3>
+<ul class="list">
+{% for c in recent %}<li><span class="grow">{{ c.user.name }}<br><small>{{ c.created_at.strftime('%d %b %Y') }} · {{ c.payment_method }}</small></span><span class="amt">KES {{ "{:,.0f}".format(c.amount) }}</span></li>
+{% else %}<li class="empty grow">No contributions recorded yet.</li>{% endfor %}
+</ul></div>
+{% endblock %}
+{% block tabs %}{% include '_tabs.html' %}{% endblock %}
